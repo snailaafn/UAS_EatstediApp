@@ -37,7 +37,7 @@ class LoginActivity : AppCompatActivity() {
                 intent.putExtra("email", savedEmail)
 
                 startActivity(intent)
-                finish()
+//                finish()
 
             } else {
                 Toast.makeText(this, "Invalid", Toast.LENGTH_SHORT).show()

@@ -1,14 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".CartFragment">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".CartFragment"
+    android:padding="24dp"
+    android:layout_marginTop="60dp">
 
-    <!-- TODO: Update blank fragment layout -->
     <TextView
+        android:id="@+id/txt_cart"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="CART" />
+        android:layout_height="wrap_content"
+        android:text="Your Cart"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:padding="18dp"
+        android:gravity="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
-</FrameLayout>
+    <ListView
+        android:id="@+id/lv_cart"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txt_cart"/>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

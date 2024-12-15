@@ -1,14 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ProfileFragment">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".ProfileFragment"
+    android:padding="30dp">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="PROFILE" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/profile_card"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:padding="24dp"
+        android:layout_marginTop="60dp">
 
-</FrameLayout>
+        <ImageView
+            android:id="@+id/img_profile"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:src="@drawable/baseline_person_2_24"
+            app:layout_constraintTop_toTopOf="@id/profile_card"
+            app:layout_constraintStart_toStartOf="@id/profile_card"
+            app:layout_constraintEnd_toEndOf="@id/profile_card"
+            />
+
+        <TextView
+            android:id="@+id/txt_profile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Profile"
+            android:textStyle="bold"
+            android:textSize="24sp"
+            app:layout_constraintTop_toBottomOf="@id/img_profile"
+            app:layout_constraintStart_toStartOf="@id/profile_card"
+            app:layout_constraintEnd_toEndOf="@id/profile_card"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/black"
+            />
+
+        <TextView
+            android:id="@+id/txt_full_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/txt_profile"
+            android:text="Username: "
+            app:layout_constraintStart_toStartOf="@id/profile_card"
+            app:layout_constraintEnd_toEndOf="@id/profile_card"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginTop="24dp"
+            android:textColor="@color/black"
+            />
+
+        <TextView
+            android:id="@+id/show_full_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/txt_full_name"
+            android:text=""
+            app:layout_constraintStart_toStartOf="@id/profile_card"
+            app:layout_constraintEnd_toEndOf="@id/profile_card"
+            android:textSize="18sp"
+            android:textColor="@color/black"
+            />
+
+        <TextView
+            android:id="@+id/txt_email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/show_full_name"
+            android:text="Email: "
+            app:layout_constraintStart_toStartOf="@id/profile_card"
+            app:layout_constraintEnd_toEndOf="@id/profile_card"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginTop="24dp"
+            android:textColor="@color/black"
+            />
+
+        <TextView
+            android:id="@+id/show_email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@+id/txt_email"
+            android:text=""
+            app:layout_constraintStart_toStartOf="@id/profile_card"
+            app:layout_constraintEnd_toEndOf="@id/profile_card"
+            android:textSize="18sp"
+            android:textColor="@color/black"
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
