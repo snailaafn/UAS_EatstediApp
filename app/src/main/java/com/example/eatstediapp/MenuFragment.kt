@@ -1,11 +1,18 @@
 package com.example.eatstediapp
 
+import android.app.Activity.RESULT_OK
+import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.view.menu.MenuAdapter
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.eatstediapp.database.Cart
@@ -20,23 +27,13 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [MenuFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
+@Suppress("DEPRECATION")
 class MenuFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
     private lateinit var binding: FragmentMenuBinding
     private lateinit var mCartDao: CartDao
     private lateinit var executorService: ExecutorService
+    private var menuList: MutableList<Menus> = mutableListOf()
+
 
 //    override fun onCreate(savedInstanceState: Bundle?) {
 //        super.onCreate(savedInstanceState)
@@ -56,36 +53,42 @@ class MenuFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
+        setHasOptionsMenu(true)
         executorService = Executors.newSingleThreadExecutor()
         val db = CartRoomDatabase.getDatabase(requireContext())
         mCartDao = db?.cartDao() ?: throw NullPointerException("CartDao is null")
 
         binding.rvMenu.layoutManager = LinearLayoutManager(requireContext())
+        // Inisialisasi adapter di awal
+        val adapter = MenuAdapter(
+            menuList,
+            emptySet(), // Set cartMenus kosong dulu, akan di-update nanti
+            onCartClicked = { menus, isCarted -> handleCart(menus, isCarted) },
+            onEditClick = { productName ->
+                val intent = Intent(requireContext(), SecondActivity::class.java)
+                intent.putExtra("productName", productName)
+                editProductLauncher.launch(intent) // Start activity for result
+            }
+        )
+        binding.rvMenu.adapter = adapter
+
         val client = ApiClient.getInstance()
         val responseMenu = client.getAllMenu()
 
         responseMenu.enqueue(object : Callback<List<Menus>> {
             override fun onResponse(call: Call<List<Menus>>, response: Response<List<Menus>>) {
                 if (response.isSuccessful && response.body() != null) {
-                    val menuList = response.body()!!
+                    menuList.clear()
+                    menuList.addAll(response.body()!!)
 
                     mCartDao.allCarts().observe(viewLifecycleOwner) { cartList ->
-                        cartList?.let {
                         val cartMenus = cartList.map { it.productName }.toSet()
-
-                        val adapter = MenuAdapter(menuList, cartMenus) { menus, isCarted ->
-                            handleCart(menus, isCarted)
-                        }
-                        binding.rvMenu.adapter = adapter
-                        }
+                        // Update adapter setelah data diubah
+                        adapter.updateCartMenus(cartMenus) // Tambahkan fungsi di adapter
                     }
+                    adapter.notifyDataSetChanged()
                 } else {
-                    Toast.makeText(
-                        requireContext(),
-                        "Gagal mengambil data menu",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    Toast.makeText(requireContext(), "Gagal mengambil data menu", Toast.LENGTH_SHORT).show()
                 }
             }
 
@@ -117,7 +120,71 @@ class MenuFragment : Fragment() {
         }
     }
 
-////    companion object {
+    private val editProductLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                val data = result.data
+                val oldProductName = data?.getStringExtra("oldProductName")
+                val newProductName = data?.getStringExtra("newProductName")
+
+                if (oldProductName != null && newProductName != null) {
+                    executorService.execute {
+                        // Perbarui database jika data ada di keranjang
+                        val cart = mCartDao.getCartByProductName(oldProductName)
+                        if (cart != null) {
+                            val updatedCart = cart.copy(productName = newProductName)
+                            mCartDao.updateCart(updatedCart)
+                        }
+
+                        // Update nama produk di menuList
+                        requireActivity().runOnUiThread {
+                            val itemIndex = menuList.indexOfFirst { it.name == oldProductName }
+                            if (itemIndex != -1) {
+                                menuList[itemIndex].name = newProductName // Update data di list
+
+                                requireActivity().runOnUiThread {
+                                    binding.rvMenu.adapter?.notifyItemChanged(itemIndex) // Perbarui satu item
+                                    Toast.makeText(requireContext(), "Produk berhasil diperbarui", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.menu_option, menu)
+    }
+    // Handle klik menu item
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.option_logout -> {
+                handleLogout()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+    private fun handleLogout() {
+        // Hapus data sesi di SharedPreferences
+        val sharedPref: SharedPreferences =
+            requireActivity().getSharedPreferences("my_prefs", android.content.Context.MODE_PRIVATE)
+        sharedPref.edit().clear().apply()
+
+        // Arahkan ke LoginActivity
+        val intent = Intent(requireContext(), LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+
+        // Tutup Fragment atau Activity yang sedang berjalan
+        requireActivity().finish()
+    }
+
+
+
+
+    ////    companion object {
 ////        /**
 ////         * Use this factory method to create a new instance of
 ////         * this fragment using the provided parameters.
@@ -136,4 +203,7 @@ class MenuFragment : Fragment() {
 ////                }
 ////            }
 //    }
+    companion object {
+        private const val REQUEST_CODE_EDIT = 100
+    }
 }

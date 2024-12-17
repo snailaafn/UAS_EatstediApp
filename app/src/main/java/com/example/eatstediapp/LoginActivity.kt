@@ -27,6 +27,19 @@ class LoginActivity : AppCompatActivity() {
             val usernameInput = binding.fieldUsername.text.toString()
             val passwordInput = binding.fieldPassword.text.toString()
 
+            // Cek apakah input kosong
+            if (usernameInput.isEmpty()) {
+                Toast.makeText(this, "Username harus diisi", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+            if (passwordInput.isEmpty()) {
+                Toast.makeText(this, "Password harus diisi", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
+
+            //validasi login
             val savedUsername = sharedPreferences.getString("username", "")
             val savedPassword = sharedPreferences.getString("password", "")
             val savedEmail = sharedPreferences.getString("email", "")
@@ -37,7 +50,7 @@ class LoginActivity : AppCompatActivity() {
                 intent.putExtra("email", savedEmail)
 
                 startActivity(intent)
-//                finish()
+                finish()
 
             } else {
                 Toast.makeText(this, "Invalid", Toast.LENGTH_SHORT).show()
